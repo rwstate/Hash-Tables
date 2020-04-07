@@ -54,7 +54,22 @@ class HashTable:
 
         Fill this in.
         '''
-        pass
+        index = self._hash_mod(key)
+
+        pair = self.storage[index]
+
+        if pair is not None:
+            while pair is not None:
+                if pair.key == key:
+                    pair.value = value
+                    return
+                if pair.next == None:
+                    pair.next = LinkedPair(key, value)
+                    return
+                pair = pair.next
+            
+        else:
+            self.storage[index] = LinkedPair(key, value)
 
 
 
@@ -66,7 +81,28 @@ class HashTable:
 
         Fill this in.
         '''
-        pass
+        index = self._hash_mod(key)
+        pair = self.storage[index]
+
+        if pair is not None:
+            if pair.key == key:
+                if pair.next is not None:
+                    self.storage[index] = pair.next
+                    return
+                else:
+                    self.storage[index] = None
+                    return
+            while pair.next is not None:
+                if pair.next.key == key:
+                    if pair.next.next is not None:
+                        pair.next = pair.next.next
+                        return
+                    else:
+                        pair.next = None
+                        return
+                pair = pair.next
+
+        print('key does not exist')
 
 
     def retrieve(self, key):
@@ -77,7 +113,20 @@ class HashTable:
 
         Fill this in.
         '''
-        pass
+        index = self._hash_mod(key)
+        pair = self.storage[index]
+
+        if pair is not None:
+            while pair.next is not None:
+                if pair.key == key:
+                    print(pair.value)
+                    return pair.value
+                pair = pair.next
+            if pair.key == key:
+                    print(pair.value)
+                    return pair.value
+
+        print('key does not exist')
 
 
     def resize(self):
@@ -87,34 +136,43 @@ class HashTable:
 
         Fill this in.
         '''
-        pass
+        newTable = HashTable(self.capacity * 2)
+        
+        for i in self.storage:
+            pair = i
+            while pair is not None:
+                newTable.insert(pair.key, pair.value)
+                pair = pair.next
+        self.capacity = newTable.capacity
+        self.storage = newTable.storage
 
 
 
-if __name__ == "__main__":
-    ht = HashTable(2)
 
-    ht.insert("line_1", "Tiny hash table")
-    ht.insert("line_2", "Filled beyond capacity")
-    ht.insert("line_3", "Linked list saves the day!")
+# if __name__ == "__main__":
+#     ht = HashTable(2)
 
-    print("")
+#     ht.insert("line_1", "Tiny hash table")
+#     ht.insert("line_2", "Filled beyond capacity")
+#     ht.insert("line_3", "Linked list saves the day!")
 
-    # Test storing beyond capacity
-    print(ht.retrieve("line_1"))
-    print(ht.retrieve("line_2"))
-    print(ht.retrieve("line_3"))
+#     print("")
 
-    # Test resizing
-    old_capacity = len(ht.storage)
-    ht.resize()
-    new_capacity = len(ht.storage)
+#     # Test storing beyond capacity
+#     print(ht.retrieve("line_1"))
+#     print(ht.retrieve("line_2"))
+#     print(ht.retrieve("line_3"))
 
-    print(f"\nResized from {old_capacity} to {new_capacity}.\n")
+#     # Test resizing
+#     old_capacity = len(ht.storage)
+#     ht.resize()
+#     new_capacity = len(ht.storage)
 
-    # Test if data intact after resizing
-    print(ht.retrieve("line_1"))
-    print(ht.retrieve("line_2"))
-    print(ht.retrieve("line_3"))
+#     print(f"\nResized from {old_capacity} to {new_capacity}.\n")
 
-    print("")
+#     # Test if data intact after resizing
+#     print(ht.retrieve("line_1"))
+#     print(ht.retrieve("line_2"))
+#     print(ht.retrieve("line_3"))
+
+#     print("")
