@@ -15,6 +15,7 @@ class HashTable:
     def __init__(self, capacity):
         self.capacity = capacity  # Number of buckets in the hash table
         self.storage = [None] * capacity
+        self.blocks = 0
 
 
     def _hash(self, key):
@@ -43,7 +44,7 @@ class HashTable:
         return self._hash(key) % self.capacity
 
 
-    def insert(self, key, value):
+    def insert(self, key, value, copying=False):
         '''
         Store the value with the given key.
 
@@ -65,11 +66,17 @@ class HashTable:
                     return
                 if pair.next == None:
                     pair.next = LinkedPair(key, value)
+                    self.blocks += 1
+                    if not copying:
+                        self.check_usage()
                     return
                 pair = pair.next
             
         else:
             self.storage[index] = LinkedPair(key, value)
+            self.blocks += 1
+            if not copying:
+                self.check_usage()
 
 
 
@@ -88,17 +95,25 @@ class HashTable:
             if pair.key == key:
                 if pair.next is not None:
                     self.storage[index] = pair.next
+                    self.blocks -= 1
+                    self.check_usage()
                     return
                 else:
                     self.storage[index] = None
+                    self.blocks -= 1
+                    self.check_usage()
                     return
             while pair.next is not None:
                 if pair.next.key == key:
                     if pair.next.next is not None:
                         pair.next = pair.next.next
+                        self.blocks -= 1
+                        self.check_usage()
                         return
                     else:
                         pair.next = None
+                        self.blocks -= 1
+                        self.check_usage()
                         return
                 pair = pair.next
 
@@ -119,33 +134,42 @@ class HashTable:
         if pair is not None:
             while pair.next is not None:
                 if pair.key == key:
-                    print(pair.value)
                     return pair.value
                 pair = pair.next
             if pair.key == key:
-                    print(pair.value)
                     return pair.value
 
         print('key does not exist')
 
 
-    def resize(self):
+    def resize(self, mod=2):
         '''
         Doubles the capacity of the hash table and
         rehash all key/value pairs.
 
         Fill this in.
         '''
-        newTable = HashTable(self.capacity * 2)
+        import math
+        newTable = HashTable(math.floor(self.capacity * mod))
         
         for i in self.storage:
             pair = i
             while pair is not None:
-                newTable.insert(pair.key, pair.value)
+                newTable.insert(pair.key, pair.value, True)
                 pair = pair.next
         self.capacity = newTable.capacity
         self.storage = newTable.storage
 
+    def check_usage(self):
+        usage = self.blocks / self.capacity
+        print(usage)
+        if usage > .7:
+            self.resize()
+            return
+        elif usage < .2:
+            self.resize(.5)
+            return
+        # pass
 
 
 
